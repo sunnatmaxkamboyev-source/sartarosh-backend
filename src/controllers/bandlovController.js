@@ -1,6 +1,7 @@
 const Bandlov = require("../models/Bandlov");
+const { xabarYuborish } = require("../bot/telegramBot");
 
-
+// Mijoz uchun — yangi band qilish yaratish
 async function bandlovYaratish(req, res) {
   try {
     const { sana, vaqt, ism, telefon, joy, xizmatlar, izoh } = req.body;
@@ -11,7 +12,7 @@ async function bandlovYaratish(req, res) {
       });
     }
 
-    
+    // Shu sana+vaqt allaqachon band qilinganmi, tekshiramiz
     const mavjud = await Bandlov.findOne({
       sana: new Date(sana),
       vaqt,
@@ -35,13 +36,42 @@ async function bandlovYaratish(req, res) {
     });
 
     res.status(201).json(yangiBandlov);
+
+    // Mijozga javob yuborilgandan KEYIN, sartaroshga Telegram xabarini jo'natamiz
+    bildirishnomaniYuborish(yangiBandlov);
   } catch (xato) {
     console.error("Bandlov yaratishda xato:", xato);
     res.status(500).json({ xabar: "Serverda xatolik yuz berdi" });
   }
 }
 
+// Sartaroshga yangi bandlov haqida Telegram orqali xabar yuborish
+function bildirishnomaniYuborish(bandlov) {
+  const adminChatId = process.env.ADMIN_CHAT_ID;
+  if (!adminChatId) return; // sozlanmagan bo'lsa, shunchaki o'tkazib yuboramiz
 
+  const sanaMatni = new Date(bandlov.sana).toLocaleDateString("uz-UZ", {
+    day: "numeric",
+    month: "long",
+  });
+
+  const xizmatlarMatni = bandlov.xizmatlar.length
+    ? bandlov.xizmatlar.join(", ")
+    : "ko'rsatilmagan";
+
+  const matn =
+    "🆕 Yangi band qilish!\n\n" +
+    `👤 Ism: ${bandlov.ism}\n` +
+    `📞 Telefon: ${bandlov.telefon}\n` +
+    `📅 Sana: ${sanaMatni}\n` +
+    `🕐 Vaqt: ${bandlov.vaqt}\n` +
+    `✂️ Xizmat: ${xizmatlarMatni}` +
+    (bandlov.izoh ? `\n💬 Izoh: ${bandlov.izoh}` : "");
+
+  xabarYuborish(adminChatId, matn);
+}
+
+// Mijoz uchun — berilgan sanada qaysi vaqtlar band ekanini ko'rsatish
 async function bandVaqtlarniOlish(req, res) {
   try {
     const { sana } = req.query;
@@ -107,7 +137,7 @@ async function bandlovHolatiniOzgartirish(req, res) {
   }
 }
 
-
+// Sartarosh uchun — bandlovni butunlay o'chirish
 async function bandlovniOchirish(req, res) {
   try {
     const { id } = req.params;
