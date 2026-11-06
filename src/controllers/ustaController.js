@@ -1,6 +1,6 @@
 const Usta = require("../models/Usta");
 
-// Ochiq — mijozlar uchun usta profilini ko'rsatish (parol qaytarilmaydi)
+
 async function ustaProfiliniOlish(req, res) {
   try {
     const usta = await Usta.findOne().select("-parolHash");
@@ -16,7 +16,6 @@ async function ustaProfiliniOlish(req, res) {
   }
 }
 
-// Himoyalangan — sartarosh o'z ism/lavozimini yangilaydi
 async function ustaProfiliniYangilash(req, res) {
   try {
     const { ism, lavozim } = req.body;
@@ -38,7 +37,7 @@ async function ustaProfiliniYangilash(req, res) {
   }
 }
 
-// Himoyalangan — rasm yuklash/almashtirish
+
 async function ustaRasminiYangilash(req, res) {
   try {
     if (!req.file) {

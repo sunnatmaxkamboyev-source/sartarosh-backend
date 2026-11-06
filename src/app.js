@@ -6,9 +6,15 @@ const ustaRoutes = require("./routes/ustaRoutes");
 
 const app = express();
 
+
+const ruxsatEtilganManzillar = [
+  process.env.FRONTEND_URL || "http://localhost:5173",
+  "https://sartaroshxona-booking.vercel.app",
+];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: ruxsatEtilganManzillar,
   })
 );
 app.use(express.json());
